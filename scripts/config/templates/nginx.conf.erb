@@ -44,7 +44,7 @@ http {
     keepalive_timeout 5;
     root <%= root %>;
   <% if error_page %>
-    error_page 404 500 /<%= error_page %>;
+    error_page 404 410 500 /<%= error_page %>;
   <% end %>
   <% if proxies.any? %>
     resolver <%= resolver %>;
@@ -60,7 +60,7 @@ http {
     location / {
       mruby_set $fallback /app/bin/config/lib/ngx_mruby/routes_fallback.rb cache;
     <% if clean_urls %>
-      try_files $uri.html $uri $uri/index.html =404;
+      try_files $uri.html $uri $uri/index.html $fallback;
     <% else %>
       try_files $uri $uri/ $fallback;
     <% end %>
@@ -102,6 +102,10 @@ http {
     return 404;
   }
 
+  location @410 {
+    return 410;
+  }
+
   # fallback proxy named match
   <% proxies.each do |location, hash| %>
     set $<%= hash['name'] %> <%= hash['host'] %>;
@@ -128,6 +132,12 @@ http {
       }
     <% end %>
   <% end %>
+
+<% brand_redirects.each do |path, hash| %>
+  location @brand_<%= path %> {
+  return 302 <%= hash['url'] %>;
+  }
+<% end %>
 
     location ~* "\.(ico|css|js|gif|jpe?g|png|svg|webp|woff2?|ttf|ijmap|eot)$" {
       expires 1y;

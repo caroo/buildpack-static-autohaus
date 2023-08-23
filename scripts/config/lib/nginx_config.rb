@@ -63,6 +63,21 @@ class NginxConfig
       json["redirects"][loc].merge!("url" => NginxConfigUtil.interpolate(hash["url"], ENV))
     end
 
+    json['pagination_redirects'] ||= []
+    json['pagination_redirects'] = json['pagination_redirects'].each_with_object({}) do |redirect, memo|
+      memo["#{redirect.gsub(/\//, '_')}"] = {"url" => NginxConfigUtil.interpolate(redirect, ENV)}
+    end
+
+    json['all_city_redirect'] ||= []
+    json['all_city_redirect'] = json['all_city_redirect'].each_with_object({}) do |redirect, memo|
+      memo[redirect] = {"url" => NginxConfigUtil.interpolate(redirect, ENV)}
+    end
+
+    json["brand_redirects"] ||= {}
+    json["brand_redirects"].each do |loc, hash|
+      json["brand_redirects"][loc].merge!("url" => NginxConfigUtil.interpolate(hash["url"], ENV))
+    end
+
     json["error_page"] ||= nil
     json["debug"] = ENV['STATIC_DEBUG']
 

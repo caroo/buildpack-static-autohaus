@@ -50,6 +50,24 @@ module NginxConfigUtil
     false
   end
 
+  def self.match_pagination_error(redirects, uri)
+    return false unless redirects
+
+    redirects.find{ |redirect| uri.match /#{redirect}-\d+/ }&.gsub(/\//, '_')
+  end
+
+  def self.match_brands_redirects(redirects, uri)
+    return false unless redirects
+
+    redirects.find{|redirect| uri.end_with?(redirect)}
+  end
+
+  def self.match_dealers_error(all_city_redirects, uri)
+    return false if all_city_redirects.empty?
+
+    all_city_redirects.find{|c| uri.match(/#{c}\/.+/)}
+  end
+
   def self.interpolate(string, vars)
     regex = /\${(\w*?)}/
 
